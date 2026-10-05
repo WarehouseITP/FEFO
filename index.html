@@ -1,46 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, Arial, sans-serif; margin: 0; padding: 12px; background: #f4f4f2; color: #222; }
-    h2 { font-size: 16px; margin: 8px 0; }
-    .card { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
-    button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 15px; margin-top: 8px; cursor: pointer; }
-    .btn-primary { background: #1D9E75; color: white; }
-    .btn-secondary { background: #eee; color: #222; }
-    .btn-in { background: #378ADD; color: white; }
-    .btn-out { background: #D85A30; color: white; }
-    input, select { width: 100%; padding: 10px; margin-top: 4px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
-    label { font-size: 12px; color: #666; margin-top: 8px; display: block; }
-    #reader { width: 100%; border-radius: 8px; overflow: hidden; }
-    .row2 { display: flex; gap: 8px; }
-    .row2 > div { flex: 1; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; background: #FAEEDA; color: #854F0B; margin-right: 6px; }
-    .badge-wh { background: #DCEBFC; color: #1C5AA6; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
-    th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid #eee; }
-    .expiry-option { padding: 8px; border: 1px solid #ddd; border-radius: 6px; margin-top: 6px; cursor: pointer; }
-    .expiry-option.selected { border-color: #1D9E75; background: #E1F5EE; }
-    .msg { padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 13px; }
-    .msg-ok { background: #EAF3DE; color: #3B6D11; }
-    .msg-err { background: #FCEBEB; color: #A32D2D; }
-    .hidden { display: none; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bin QR Code with FEFO System</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,Arial,sans-serif;margin:0;padding:0 12px 24px;background:#f4f4f2;color:#222}
+h2{font-size:16px;margin:8px 0}
+.card{background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+button{width:100%;padding:12px;border-radius:8px;border:none;font-size:15px;margin-top:8px;cursor:pointer}
+button:disabled{opacity:.6;cursor:default}
+.btn-primary{background:#1D9E75;color:#fff}.btn-secondary{background:#eee;color:#222}
+.btn-in{background:#378ADD;color:#fff}.btn-out{background:#D85A30;color:#fff}
+input,select{width:100%;padding:10px;margin-top:4px;border-radius:6px;border:1px solid #ccc;font-size:14px;background:#fff}
+label{font-size:12px;color:#666;margin-top:8px;display:block}
+#reader{width:100%;border-radius:8px;overflow:hidden}
+.row2{display:flex;gap:8px}.row2>div,.row2>button{flex:1}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;background:#FAEEDA;color:#854F0B;margin-right:6px}
+.badge-wh{background:#DCEBFC;color:#1C5AA6}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
+.opt{padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:6px;cursor:pointer;font-size:13px}
+.opt.selected{border-color:#1D9E75;background:#E1F5EE}
+.sub{color:#777;font-size:12px}
+.msg{padding:10px;border-radius:6px;margin-top:8px;font-size:13px}
+.msg-ok{background:#EAF3DE;color:#3B6D11}.msg-err{background:#FCEBEB;color:#A32D2D}
+.hidden{display:none}
+.tabs{display:flex;gap:6px;position:sticky;top:0;background:#f4f4f2;padding:10px 0;z-index:5}
+.tab{margin:0;padding:10px;background:#e4e4e0;color:#444;font-size:14px}
+.tab.on{background:#1D9E75;color:#fff}
+.cnt{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#D85A30;color:#fff;font-size:11px;margin-left:4px}
+.back{width:auto;padding:6px 12px;margin:0 0 6px;background:transparent;color:#1C5AA6;font-size:14px}
+.mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin:10px 0}
+.met{margin:0;padding:8px 10px;text-align:left;background:#f4f4f2;border:2px solid transparent;color:#222;font-size:12px}
+.met.on{background:#fff;border-color:#888}
+.met b{display:block;font-size:22px;font-weight:600;margin-top:2px}
+.gh{font-size:12px;font-weight:600;color:#666;margin:14px 0 2px}
+.mr{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #eee;font-size:13px;cursor:pointer}
+.mr:last-child{border-bottom:none}.rt{text-align:right;white-space:nowrap}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px;margin-left:6px;background:#eee;color:#555}
+.hint{font-size:12px;margin-top:10px;padding:8px 10px;border-radius:6px;background:#DCEBFC;color:#1C5AA6}
+</style>
 </head>
 <body>
 
-  <div id="expiryBanner" class="card hidden" style="background:#FFF4E5;border:1px solid #F0B429">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2 style="color:#854F0B;margin:0">⚠️ Barang mendekati expired</h2>
-      <button style="width:auto;padding:6px 10px;background:transparent;color:#854F0B;font-size:18px;margin:0" onclick="document.getElementById('expiryBanner').classList.add('hidden')">✕</button>
-    </div>
-    <p style="font-size:12px;color:#854F0B;margin:6px 0">Expired dalam 50 hari ke depan:</p>
-    <div id="expiryBannerList" style="max-height:260px;overflow-y:auto"></div>
-  </div>
+<div class="tabs">
+  <button class="tab on" id="tabScan" onclick="showView('scan')">Scan</button>
+  <button class="tab" id="tabMon" onclick="openMon()">Monitoring<span class="cnt hidden" id="monBadge"></span></button>
+</div>
 
+<div id="v-scan" class="view">
   <div class="card">
     <h2>Scan QR</h2>
     <div id="reader"></div>
@@ -49,320 +60,357 @@
     <input id="manualWh" placeholder="WH Code, misal WH1">
     <input id="manualCode" placeholder="Code number, misal RM-2200-118" style="margin-top:6px">
     <button class="btn-secondary" onclick="lookupManual()">Cari</button>
-    <p style="font-size:12px;color:#888;text-align:center;margin-top:10px;margin-bottom:0">*tunggu 2-3 detik setelah scan atau melakukan pencarian</p>
+    <p id="scanStatus" class="sub" style="text-align:center;margin:10px 0 0">*tunggu 2-3 detik setelah scan atau melakukan pencarian</p>
   </div>
+</div>
 
-  <div id="ambiguousCard" class="card hidden">
+<div id="v-ambig" class="view hidden">
+  <button class="back" onclick="showView('scan')">&larr; Kembali</button>
+  <div class="card">
     <h2 id="ambigName">-</h2>
     <div class="badge" id="ambigCode">-</div>
     <p style="font-size:13px;color:#666;margin-top:10px">Code number ini ada di beberapa WH. Pilih salah satu:</p>
     <div id="ambigOptions"></div>
   </div>
+</div>
 
-  <div id="itemCard" class="card hidden">
+<div id="v-item" class="view hidden">
+  <button class="back" onclick="showView('scan')">&larr; Scan barang lain</button>
+  <div class="card">
     <h2 id="itemName">-</h2>
-    <div class="badge" id="itemCode">-</div>
-    <div class="badge badge-wh" id="itemWhBadge">-</div>
+    <div class="badge" id="itemCode">-</div><div class="badge badge-wh" id="itemWhBadge">-</div>
     <table>
       <tr><td>UOM</td><td id="itemUom">-</td></tr>
       <tr><td>WH Code</td><td id="itemWh">-</td></tr>
       <tr><td>Location</td><td id="itemLoc">-</td></tr>
+      <tr><td>Shelf life</td><td id="itemShelf">-</td></tr>
       <tr><td><b>Total stock</b></td><td id="itemStock">-</td></tr>
     </table>
-    <button class="btn-secondary" onclick="showForm('location')">Ubah lokasi</button>
-
+    <button class="btn-secondary" onclick="openForm('loc')">Ubah lokasi</button>
     <div class="row2" style="margin-top:8px">
-      <button class="btn-in" onclick="showForm('receiving')">Receiving</button>
-      <button class="btn-out" onclick="showForm('issuing')">Issuing</button>
+      <button class="btn-in" onclick="openForm('rcv')">Receiving</button>
+      <button class="btn-out" onclick="openForm('isu')">Issuing</button>
     </div>
-
-    <h2 style="margin-top:16px">Breakdown expired date</h2>
+    <h2 style="margin-top:16px">Breakdown per batch</h2>
     <div id="expiryList"></div>
-
     <h2 style="margin-top:16px">Bin card (10 transaksi terakhir)</h2>
     <table>
-      <thead><tr><th>Tgl</th><th>Doc</th><th>Exp</th><th>In</th><th>Out</th><th>Bal</th></tr></thead>
+      <thead><tr><th>Tgl</th><th>Doc</th><th>Exp / Prod</th><th>In</th><th>Out</th><th>Bal</th></tr></thead>
       <tbody id="logBody"></tbody>
     </table>
   </div>
+</div>
 
-  <div id="locationForm" class="card hidden">
-    <h2>Ubah lokasi</h2>
-    <label>WH Code</label><input id="locWh">
-    <label>Location</label><input id="locLocation">
+<div id="v-loc" class="view hidden">
+  <button class="back" onclick="showView('item')">&larr; Kembali</button>
+  <div class="card">
+    <h2>Ubah lokasi simpan</h2>
+    <p class="sub">WH Code adalah identitas barang dan tidak bisa diubah di sini. Yang diubah hanya lokasi simpan.</p>
+    <label>WH Code</label><input id="locWh" disabled>
+    <label>Location (gudang / rak, misal 1A / R12-03)</label><input id="locLocation">
     <label>Initial store keeper</label><input id="locInitial">
-    <button class="btn-primary" onclick="submitLocation()">Simpan lokasi baru</button>
-    <button class="btn-secondary" onclick="hideForms()">Batal</button>
+    <button class="btn-primary" id="locBtn" onclick="submitLocation()">Simpan lokasi baru</button>
+    <button class="btn-secondary" onclick="showView('item')">Batal</button>
     <div id="locMsg"></div>
   </div>
+</div>
 
-  <div id="receivingForm" class="card hidden">
+<div id="v-rcv" class="view hidden">
+  <button class="back" onclick="showView('item')">&larr; Kembali</button>
+  <div class="card">
     <h2>Form receiving</h2>
     <label>Tanggal</label><input type="date" id="rcvDate">
     <label>Doc No (nomor GRN/PO manual)</label><input id="rcvDocNo">
-    <label>Expired date barang masuk (kosongkan kalau barang tidak punya expired, misal spare part)</label>
-    <input type="date" id="rcvExpDate">
+    <label>Expired date (kosongkan kalau barang tidak punya expired)</label><input type="date" id="rcvExpDate">
+    <label>Production date (isi kalau barang hanya punya tanggal produksi)</label><input type="date" id="rcvProdDate">
+    <div class="hint" id="rcvHint"></div>
     <label>Quantity masuk</label><input type="number" id="rcvQty">
     <label>Initial store keeper</label><input id="rcvInitial">
-    <button class="btn-primary" onclick="submitReceiving()">Simpan baris ini</button>
-    <p style="font-size:12px;color:#666;margin-top:8px">Kalau kiriman ini punya beberapa expired date berbeda (misal 600kg exp Des, 400kg exp Feb), simpan dulu baris pertama, lalu isi baris berikutnya dengan doc no yang sama.</p>
-    <button class="btn-secondary" onclick="hideForms()">Selesai / tutup</button>
+    <button class="btn-primary" id="rcvBtn" onclick="submitReceiving()">Simpan baris ini</button>
+    <p class="sub" style="margin-top:8px">Kalau kiriman punya beberapa tanggal berbeda (misal 600kg exp Des, 400kg exp Feb), simpan baris pertama, lalu isi baris berikutnya dengan doc no yang sama.</p>
+    <button class="btn-secondary" onclick="showView('item')">Selesai</button>
     <div id="rcvMsg"></div>
   </div>
+</div>
 
-  <div id="issuingForm" class="card hidden">
+<div id="v-isu" class="view hidden">
+  <button class="back" onclick="showView('item')">&larr; Kembali</button>
+  <div class="card">
     <h2>Form issuing</h2>
-    <p style="font-size:13px;color:#666">Pilih expired date yang mau dikeluarkan (paling atas = paling dekat expired):</p>
-    <div id="issuingExpiryOptions"></div>
+    <p style="font-size:13px;color:#666">Pilih batch yang mau dikeluarkan (paling atas = prioritas keluar):</p>
+    <div id="isuOptions"></div>
     <label>Tanggal</label><input type="date" id="isuDate">
     <label>Doc No (nomor issuing manual)</label><input id="isuDocNo">
     <label>Quantity keluar</label><input type="number" id="isuQty">
     <label>User (yang mengambil barang)</label><input id="isuUser">
     <label>Initial store keeper</label><input id="isuInitial">
-    <button class="btn-primary" onclick="submitIssuing()">Simpan issuing</button>
-    <button class="btn-secondary" onclick="hideForms()">Batal</button>
+    <button class="btn-primary" id="isuBtn" onclick="submitIssuing()">Simpan issuing</button>
+    <button class="btn-secondary" onclick="showView('item')">Batal</button>
     <div id="isuMsg"></div>
   </div>
+</div>
 
-  <script>
-    // GANTI dengan URL Web App hasil deploy Anda (Deploy > Manage deployments > Web app URL)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx6CKI6-mDS7StbAErpvfq_J82vae8EbMVikKJHkatsVMqiXVtp48ZE2EbxsE3c59hi/exec';
+<div id="v-mon" class="view hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2 style="margin:0">Monitoring expired</h2>
+      <button class="btn-secondary" style="width:auto;margin:0;padding:6px 12px;font-size:13px" onclick="openMon()">Muat ulang</button>
+    </div>
+    <div class="mets" id="mets"></div>
+    <div class="row2">
+      <div><select id="monWh" onchange="renderMon()"><option value="">Semua WH</option></select></div>
+      <div style="flex:2"><input id="monQ" placeholder="Cari code atau nama" oninput="renderMon()"></div>
+    </div>
+    <div id="monList"></div>
+  </div>
+</div>
 
-    function callApi(action, payload) {
-      return fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action, payload })
-      })
-      .then(r => {
-        if (!r.ok) throw new Error('Server merespon status ' + r.status);
-        return r.json();
-      })
-      .catch(err => {
-        alert('Gagal menghubungi server. Cek koneksi internet atau API_URL di index.html.\n\nDetail: ' + err.message);
-        throw err;
-      });
-    }
+<script>
+// GANTI dengan URL Web App hasil deploy Anda
+const API_URL = 'https://script.google.com/macros/s/AKfycbx6CKI6-mDS7StbAErpvfq_J82vae8EbMVikKJHkatsVMqiXVtp48ZE2EbxsE3c59hi/exec';
 
-    let currentItem = null;
-    let selectedExpiry = null;
-    let expirySelected = false;
-    let scanner = new Html5Qrcode("reader"); // dibuat sekali saja, dipakai ulang terus (bukan bikin instance baru tiap restart)
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => new Date().toISOString().slice(0, 10);
 
-    function startScanner() {
-      scanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 220 },
-        (decodedText) => {
-          safeStopScanner();
-          // format QR baru: "WH1|61137588" - format lama (QR sudah kadung diprint): "61137588" saja
-          if (decodedText.indexOf('|') !== -1) {
-            const parts = decodedText.split('|');
-            doLookup(parts[0].trim(), parts[1].trim());
-          } else {
-            doLookup('', decodedText.trim());
-          }
-        }
-      ).catch(err => console.log('Kamera tidak bisa diakses:', err));
-    }
+function callApi(action, payload, quiet) {
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, payload })
+  })
+  .then(r => { if (!r.ok) throw new Error('Server merespon status ' + r.status); return r.json(); })
+  .catch(err => {
+    if (!quiet) alert('Gagal menghubungi server. Cek koneksi internet atau API_URL di index.html.\n\nDetail: ' + err.message);
+    throw err;
+  });
+}
 
-    // stop() bisa gagal kalau scanner memang sudah berhenti - ditangkap supaya tidak
-    // menghentikan proses selanjutnya (ini penyebab tombol "Scan ulang" sebelumnya macet)
-    function safeStopScanner() {
-      try {
-        const state = scanner.getState ? scanner.getState() : null;
-        if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
-          return scanner.stop().catch(() => {});
-        }
-      } catch (e) { /* diamkan, scanner memang belum/tidak jalan */ }
-      return Promise.resolve();
-    }
+// kirim transaksi: tombol dikunci selama proses supaya tidak tercatat dobel
+function send(btnId, action, payload) {
+  const b = $(btnId), t = b.innerText;
+  b.disabled = true; b.innerText = 'Menyimpan...';
+  return callApi(action, payload).finally(() => { b.disabled = false; b.innerText = t; });
+}
+function showMsg(id, res) { const m = $(id); m.className = 'msg ' + (res.success ? 'msg-ok' : 'msg-err'); m.innerText = res.message; }
 
-    function restartScanner() {
-      safeStopScanner().then(() => {
-        setTimeout(startScanner, 300);
-      });
-    }
-    window.onload = function() {
-      startScanner();
-      loadExpiryBanner();
-    };
+// ---------- navigasi ----------
+const VIEWS = ['scan', 'ambig', 'item', 'loc', 'rcv', 'isu', 'mon'];
+function showView(v) {
+  VIEWS.forEach(x => $('v-' + x).classList.toggle('hidden', x !== v));
+  $('tabScan').classList.toggle('on', v !== 'mon');
+  $('tabMon').classList.toggle('on', v === 'mon');
+  window.scrollTo(0, 0);
+  if (v === 'scan') restartScanner(); else safeStopScanner();
+}
+function openForm(f) {
+  ['locMsg', 'rcvMsg', 'isuMsg'].forEach(i => { $(i).className = ''; $(i).innerText = ''; });
+  if (f === 'loc') { $('locWh').value = currentItem.wh_code; $('locLocation').value = currentItem.location || ''; }
+  if (f === 'rcv') { $('rcvDate').value = today(); $('rcvExpDate').value = ''; $('rcvProdDate').value = ''; rcvHint(); }
+  if (f === 'isu') buildIssuing();
+  showView(f);
+}
 
-    function loadExpiryBanner() {
-      callApi('getExpiringSoon', { thresholdDays: 50 }).then(res => {
-        if (!res.success || !res.items || res.items.length === 0) return;
-        const banner = document.getElementById('expiryBanner');
-        const list = document.getElementById('expiryBannerList');
-        list.innerHTML = '';
-        res.items.forEach(r => {
-          list.innerHTML += '<div style="background:#fff;border-radius:6px;padding:8px 10px;margin-top:6px;font-size:12px">' +
-            '<b>' + r.code_number + '</b> (' + (r.nama_barang || '') + ')<br>' +
-            'WH: ' + r.wh_code + ' — Loc: ' + (r.location || '-') + ' — Qty: ' + r.qty_available + '<br>' +
-            '<span style="color:#A32D2D">Exp: ' + r.expired_date + '</span>' +
-            '</div>';
-        });
-        banner.classList.remove('hidden');
-      }).catch(() => {}); // gagal load banner tidak perlu ganggu user dengan alert
-    }
+// ---------- scanner ----------
+let scanner = new Html5Qrcode('reader'), looking = false;
+function startScanner() {
+  scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 220 }, decoded => {
+    if (looking) return;
+    safeStopScanner();
+    // format baru "WH1|61137588", format lama "61137588"
+    if (decoded.indexOf('|') !== -1) { const p = decoded.split('|'); doLookup(p[0].trim(), p[1].trim()); }
+    else doLookup('', decoded.trim());
+  }).catch(err => console.log('Kamera tidak bisa diakses:', err));
+}
+function safeStopScanner() {
+  try {
+    const s = scanner.getState ? scanner.getState() : null;
+    if (s === Html5QrcodeScannerState.SCANNING || s === Html5QrcodeScannerState.PAUSED) return scanner.stop().catch(() => {});
+  } catch (e) {}
+  return Promise.resolve();
+}
+function restartScanner() { safeStopScanner().then(() => setTimeout(startScanner, 300)); }
 
-    function lookupManual() {
-      const wh = document.getElementById('manualWh').value.trim();
-      const code = document.getElementById('manualCode').value.trim();
-      if (code) doLookup(wh, code);
-    }
+// ---------- lookup ----------
+let currentItem = null;
+function lookupManual() {
+  const code = $('manualCode').value.trim();
+  if (code) doLookup($('manualWh').value.trim(), code);
+}
+function doLookup(wh, code) {
+  if (looking) return;
+  looking = true; $('scanStatus').innerText = 'Mencari...';
+  callApi('lookupItem', { whCode: wh, codeNumber: code }).then(renderLookup)
+    .catch(() => showView('scan'))
+    .finally(() => { looking = false; $('scanStatus').innerText = '*tunggu 2-3 detik setelah scan atau melakukan pencarian'; });
+}
+function renderLookup(res) {
+  if (!res.found) { alert(res.message); showView('scan'); return; }
+  if (res.ambiguous) {
+    $('ambigName').innerText = res.nama_barang; $('ambigCode').innerText = res.code_number;
+    const box = $('ambigOptions'); box.innerHTML = '';
+    res.options.forEach(o => {
+      const el = document.createElement('div'); el.className = 'opt';
+      el.innerText = 'WH: ' + o.wh_code + ' - Location: ' + (o.location || '-');
+      el.onclick = () => doLookup(o.wh_code, res.code_number);
+      box.appendChild(el);
+    });
+    showView('ambig'); return;
+  }
+  currentItem = res; fillItem(); showView('item');
+}
+function refreshItem() {
+  return callApi('lookupItem', { whCode: currentItem.wh_code, codeNumber: currentItem.code_number }).then(res => {
+    if (res.found && !res.ambiguous) { currentItem = res; fillItem(); }
+  });
+}
 
-    function doLookup(whCode, codeNumber, keepReceivingOpen) {
-      callApi('lookupItem', { whCode, codeNumber }).then(res => renderItem(res, keepReceivingOpen));
-    }
+function batchLabel(r) {
+  if (r.expired_date) return 'Exp: <b>' + esc(r.expired_date) + '</b>' + (r.production_date ? ' <span class="sub">(prod ' + esc(r.production_date) + ')</span>' : '');
+  if (r.production_date) return 'Prod: <b>' + esc(r.production_date) + '</b> ' +
+    (r.source === 'calc' ? '<span class="sub">(exp hitung ' + esc(r.effective_date) + ')</span>' : '<span class="sub">(umur ' + r.age_days + ' hari)</span>');
+  return '<i>Tanpa tanggal</i>';
+}
+function fillItem() {
+  const r = currentItem;
+  $('itemName').innerText = r.nama_barang; $('itemCode').innerText = r.code_number;
+  $('itemWhBadge').innerText = 'WH: ' + r.wh_code; $('itemUom').innerText = r.uom;
+  $('itemWh').innerText = r.wh_code || '-'; $('itemLoc').innerText = r.location || '-';
+  $('itemShelf').innerText = r.shelf_life_days ? r.shelf_life_days + ' hari' : '-';
+  $('itemStock').innerText = r.total_stock + ' ' + r.uom;
+  const ex = $('expiryList');
+  ex.innerHTML = r.expiry_breakdown.length ? '' : '<p class="sub">Tidak ada stock aktif.</p>';
+  r.expiry_breakdown.forEach(b => { ex.innerHTML += '<div class="opt" style="cursor:default">' + batchLabel(b) + ' - Qty: ' + b.qty_available + '</div>'; });
+  $('logBody').innerHTML = r.recent_log.map(l =>
+    '<tr><td>' + esc(l.date) + '</td><td>' + esc(l.doc_no) + '</td><td>' + esc(l.expired_date || (l.production_date ? 'P:' + l.production_date : '')) +
+    '</td><td>' + esc(l.in_qty || '') + '</td><td>' + esc(l.out_qty || '') + '</td><td>' + esc(l.balance_qty) + '</td></tr>').join('');
+}
 
-    function renderItem(res, keepReceivingOpen) {
-      document.getElementById('ambiguousCard').classList.add('hidden');
-      document.getElementById('itemCard').classList.add('hidden');
-      if (!keepReceivingOpen) hideForms();
+// ---------- ubah lokasi ----------
+function submitLocation() {
+  const payload = { whCode: currentItem.wh_code, codeNumber: currentItem.code_number, newLocation: $('locLocation').value, initial: $('locInitial').value };
+  send('locBtn', 'updateLocation', payload).then(res => {
+    showMsg('locMsg', res);
+    if (res.success) refreshItem().then(() => setTimeout(() => showView('item'), 700));
+  }).catch(() => {});
+}
 
-      if (!res.found) { alert(res.message); return; }
+// ---------- receiving ----------
+function rcvHint() {
+  const e = $('rcvExpDate').value, p = $('rcvProdDate').value;
+  $('rcvHint').innerText = e ? 'Pakai expired date. Production date disimpan sebagai info tambahan.'
+    : p ? (currentItem.shelf_life_days ? 'Expired dihitung otomatis: production date + ' + currentItem.shelf_life_days + ' hari.'
+           : 'Barang ini belum punya shelf life. Akan dipantau berdasarkan umur (ditandai kalau lebih dari 1 tahun).')
+    : 'Kosongkan dua-duanya kalau barang tidak punya tanggal (misal spare part).';
+}
+$('rcvExpDate').addEventListener('input', rcvHint);
+$('rcvProdDate').addEventListener('input', rcvHint);
 
-      if (res.ambiguous) {
-        document.getElementById('ambiguousCard').classList.remove('hidden');
-        document.getElementById('ambigName').innerText = res.nama_barang;
-        document.getElementById('ambigCode').innerText = res.code_number;
-        const optDiv = document.getElementById('ambigOptions');
-        optDiv.innerHTML = '';
-        res.options.forEach(opt => {
-          const el = document.createElement('div');
-          el.className = 'expiry-option';
-          el.innerText = 'WH: ' + opt.wh_code + ' — Location: ' + (opt.location || '-');
-          el.onclick = () => doLookup(opt.wh_code, res.code_number);
-          optDiv.appendChild(el);
-        });
-        return;
-      }
+function submitReceiving() {
+  const payload = {
+    whCode: currentItem.wh_code, codeNumber: currentItem.code_number, date: $('rcvDate').value, docNo: $('rcvDocNo').value,
+    expiredDate: $('rcvExpDate').value, productionDate: $('rcvProdDate').value, inQty: $('rcvQty').value, initial: $('rcvInitial').value
+  };
+  send('rcvBtn', 'receiveStock', payload).then(res => {
+    showMsg('rcvMsg', res);
+    if (res.success) { $('rcvExpDate').value = ''; $('rcvProdDate').value = ''; $('rcvQty').value = ''; rcvHint(); dash = null; refreshItem(); }
+  }).catch(() => {});
+}
 
-      currentItem = res;
-      document.getElementById('itemCard').classList.remove('hidden');
-      document.getElementById('itemName').innerText = res.nama_barang;
-      document.getElementById('itemCode').innerText = res.code_number;
-      document.getElementById('itemWhBadge').innerText = 'WH: ' + res.wh_code;
-      document.getElementById('itemUom').innerText = res.uom;
-      document.getElementById('itemWh').innerText = res.wh_code || '-';
-      document.getElementById('itemLoc').innerText = res.location || '-';
-      document.getElementById('itemStock').innerText = res.total_stock + ' ' + res.uom;
+// ---------- issuing ----------
+let selBatch = null, selIdx = -1;
+function buildIssuing() {
+  $('isuDate').value = today(); selBatch = null; selIdx = -1;
+  const box = $('isuOptions'); box.innerHTML = '';
+  if (!currentItem.expiry_breakdown.length) box.innerHTML = '<p class="sub">Tidak ada stock aktif.</p>';
+  currentItem.expiry_breakdown.forEach((b, i) => {
+    const el = document.createElement('div'); el.className = 'opt';
+    el.innerHTML = batchLabel(b) + ' - Qty tersedia: ' + b.qty_available;
+    el.onclick = () => { box.querySelectorAll('.opt').forEach(e => e.classList.remove('selected')); el.classList.add('selected'); selBatch = b; selIdx = i; };
+    box.appendChild(el);
+  });
+}
+function submitIssuing() {
+  if (!selBatch) { alert('Pilih salah satu batch dulu.'); return; }
+  const first = currentItem.expiry_breakdown[0];
+  if (selIdx > 0 && (first.expired_date || first.production_date) &&
+      !confirm('Batch ini bukan yang paling prioritas keluar (FEFO). Tetap lanjutkan?')) return;
+  const payload = {
+    whCode: currentItem.wh_code, codeNumber: currentItem.code_number, date: $('isuDate').value, docNo: $('isuDocNo').value,
+    expiredDate: selBatch.expired_date, productionDate: selBatch.production_date,
+    outQty: $('isuQty').value, user: $('isuUser').value, initial: $('isuInitial').value
+  };
+  send('isuBtn', 'issueStock', payload).then(res => {
+    showMsg('isuMsg', res);
+    if (res.success) { dash = null; refreshItem().then(() => setTimeout(() => showView('item'), 800)); }
+  }).catch(() => {});
+}
 
-      const expiryDiv = document.getElementById('expiryList');
-      expiryDiv.innerHTML = '';
-      if (res.expiry_breakdown.length === 0) {
-        expiryDiv.innerHTML = '<p style="font-size:13px;color:#999">Tidak ada stock aktif.</p>';
-      }
-      res.expiry_breakdown.forEach(r => {
-        const expLabel = r.expired_date ? ('Exp: <b>' + r.expired_date + '</b>') : '<i>Tidak ada expired date</i>';
-        expiryDiv.innerHTML += '<div class="expiry-option">' + expLabel + ' — Qty: ' + r.qty_available + '</div>';
-      });
+// ---------- monitoring ----------
+const GROUPS = [
+  { k: 'expired', l: 'Sudah expired', c: '#A32D2D' },
+  { k: 'm1', l: 'Kurang 1 bulan', c: '#854F0B' },
+  { k: 'm3', l: '1 sampai 3 bulan', c: '#1C5AA6' },
+  { k: 'm6', l: '3 sampai 6 bulan', c: '#3B6D11' },
+  { k: 'age', l: 'Prod date > 1 tahun', c: '#5F5E5A' }
+];
+let dash = null, monGroup = 'all';
 
-      const logBody = document.getElementById('logBody');
-      logBody.innerHTML = '';
-      res.recent_log.forEach(l => {
-        logBody.innerHTML += '<tr><td>' + l.date + '</td><td>' + l.doc_no + '</td><td>' + (l.expired_date||'') +
-          '</td><td>' + (l.in_qty||'') + '</td><td>' + (l.out_qty||'') + '</td><td>' + l.balance_qty + '</td></tr>';
-      });
-      if (keepReceivingOpen) {
-        document.getElementById('receivingForm').classList.remove('hidden');
-      }
-    }
+function loadDash(quiet) {
+  return callApi('getDashboard', {}, quiet).then(res => {
+    if (res.success) { dash = res; updateBadge(); }
+  });
+}
+function updateBadge() {
+  const n = dash ? dash.counts.expired + dash.counts.m1 : 0, b = $('monBadge');
+  b.innerText = n; b.classList.toggle('hidden', !n);
+}
+function openMon() {
+  showView('mon');
+  $('monList').innerHTML = '<p class="sub">Memuat data...</p>';
+  loadDash().then(renderMon).catch(() => { $('monList').innerHTML = '<p class="sub">Gagal memuat data.</p>'; });
+}
+function renderMon() {
+  if (!dash) return;
+  const whSel = $('monWh'), cur = whSel.value;
+  const whs = [...new Set(dash.items.map(i => i.wh_code))].sort();
+  whSel.innerHTML = '<option value="">Semua WH</option>' + whs.map(w => '<option' + (w === cur ? ' selected' : '') + '>' + esc(w) + '</option>').join('');
+  const q = $('monQ').value.toLowerCase(), wh = whSel.value;
+  const base = dash.items.filter(i => (!wh || i.wh_code === wh) && (!q || (i.code_number + ' ' + i.nama_barang).toLowerCase().indexOf(q) > -1));
 
-    function showForm(type) {
-      hideForms();
-      if (type === 'location') {
-        document.getElementById('locationForm').classList.remove('hidden');
-        document.getElementById('locWh').value = currentItem.wh_code || '';
-        document.getElementById('locLocation').value = currentItem.location || '';
-      } else if (type === 'receiving') {
-        document.getElementById('receivingForm').classList.remove('hidden');
-        document.getElementById('rcvDate').value = new Date().toISOString().slice(0,10);
+  $('mets').innerHTML = '';
+  GROUPS.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'met' + (monGroup === g.k ? ' on' : '');
+    b.innerHTML = g.l + '<b style="color:' + g.c + '">' + base.filter(i => i.group === g.k).length + '</b>';
+    b.onclick = () => { monGroup = monGroup === g.k ? 'all' : g.k; renderMon(); };
+    $('mets').appendChild(b);
+  });
+
+  let html = '';
+  GROUPS.forEach(g => {
+    if (monGroup !== 'all' && monGroup !== g.k) return;
+    const rows = base.filter(i => i.group === g.k);
+    if (!rows.length) return;
+    html += '<div class="gh">' + g.l + ' (' + rows.length + ')' + (g.k === 'age' ? ' - belum ada shelf life, urut dari yang paling lama' : '') + '</div>';
+    rows.forEach(i => {
+      let right, tag = '';
+      if (i.group === 'age') {
+        right = '<b style="color:' + g.c + '">Umur ' + i.age_days + ' hari</b><br><span class="sub">Prod ' + esc(i.production_date) + '</span>';
       } else {
-        document.getElementById('issuingForm').classList.remove('hidden');
-        document.getElementById('isuDate').value = new Date().toISOString().slice(0,10);
-        const optDiv = document.getElementById('issuingExpiryOptions');
-        optDiv.innerHTML = '';
-        selectedExpiry = null;
-        expirySelected = false;
-        currentItem.expiry_breakdown.forEach((r, idx) => {
-          const el = document.createElement('div');
-          el.className = 'expiry-option';
-          const expLabel = r.expired_date ? ('Exp: ' + r.expired_date) : 'Tidak ada expired date';
-          el.innerText = expLabel + ' — Qty tersedia: ' + r.qty_available;
-          el.onclick = () => {
-            document.querySelectorAll('.expiry-option').forEach(e => e.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedExpiry = r.expired_date;
-            expirySelected = true;
-          };
-          optDiv.appendChild(el);
-        });
+        const d = i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left === 0 ? 'Hari ini' : i.days_left + ' hari lagi';
+        right = '<b style="color:' + g.c + '">' + d + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
+        if (i.source === 'calc') tag = '<span class="tag">Prod + ' + i.shelf_life_days + ' hari</span>';
       }
-    }
-    function hideForms() {
-      document.getElementById('receivingForm').classList.add('hidden');
-      document.getElementById('issuingForm').classList.add('hidden');
-      document.getElementById('locationForm').classList.add('hidden');
-    }
+      html += '<div class="mr" onclick="openFromMon(\'' + esc(i.wh_code) + '\',\'' + esc(i.code_number) + '\')"><div><b>' + esc(i.code_number) + '</b>' + tag +
+        '<br>' + esc(i.nama_barang) + '<br><span class="sub">' + esc(i.wh_code) + ' | ' + esc(i.location || '-') + ' | ' + i.qty_available + ' ' + esc(i.uom) + '</span></div><div class="rt">' + right + '</div></div>';
+    });
+  });
+  $('monList').innerHTML = html || '<p class="sub">Tidak ada barang yang perlu diperhatikan.</p>';
+}
+function openFromMon(wh, code) { looking = false; doLookup(wh, code); }
 
-    function submitLocation() {
-      const payload = {
-        whCode: currentItem.wh_code,
-        codeNumber: currentItem.code_number,
-        newWhCode: document.getElementById('locWh').value,
-        newLocation: document.getElementById('locLocation').value,
-        initial: document.getElementById('locInitial').value
-      };
-      callApi('updateLocation', payload).then(res => {
-        const msg = document.getElementById('locMsg');
-        msg.className = 'msg ' + (res.success ? 'msg-ok' : 'msg-err');
-        msg.innerText = res.message;
-        if (res.success) setTimeout(() => doLookup(payload.newWhCode || currentItem.wh_code, currentItem.code_number), 800);
-      });
-    }
-
-    function submitReceiving() {
-      const payload = {
-        whCode: currentItem.wh_code,
-        codeNumber: currentItem.code_number,
-        date: document.getElementById('rcvDate').value,
-        docNo: document.getElementById('rcvDocNo').value,
-        expiredDate: document.getElementById('rcvExpDate').value,
-        inQty: document.getElementById('rcvQty').value,
-        initial: document.getElementById('rcvInitial').value
-      };
-      callApi('receiveStock', payload).then(res => {
-        const msg = document.getElementById('rcvMsg');
-        msg.className = 'msg ' + (res.success ? 'msg-ok' : 'msg-err');
-        msg.innerText = res.message;
-        if (res.success) {
-          document.getElementById('rcvExpDate').value = '';
-          document.getElementById('rcvQty').value = '';
-          doLookup(currentItem.wh_code, currentItem.code_number, true);
-        }
-      });
-    }
-
-    function submitIssuing() {
-      if (!expirySelected) { alert('Pilih salah satu baris expired date dulu.'); return; }
-      const payload = {
-        whCode: currentItem.wh_code,
-        codeNumber: currentItem.code_number,
-        date: document.getElementById('isuDate').value,
-        docNo: document.getElementById('isuDocNo').value,
-        expiredDate: selectedExpiry,
-        outQty: document.getElementById('isuQty').value,
-        user: document.getElementById('isuUser').value,
-        initial: document.getElementById('isuInitial').value
-      };
-      callApi('issueStock', payload).then(res => {
-        const msg = document.getElementById('isuMsg');
-        msg.className = 'msg ' + (res.success ? 'msg-ok' : 'msg-err');
-        msg.innerText = res.message;
-        if (res.success) setTimeout(() => doLookup(currentItem.wh_code, currentItem.code_number), 800);
-      });
-    }
-  </script>
+window.onload = function () { startScanner(); loadDash(true).catch(() => {}); };
+</script>
 </body>
 </html>
