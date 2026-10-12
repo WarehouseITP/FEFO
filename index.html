@@ -393,7 +393,11 @@ const GM = [
 let dash = null, monSub = 'brg', monGroup = 'all';
 
 function loadDash(quiet) {
-  return callApi('getDashboard', {}, quiet).then(res => { if (res.success) { dash = res; updateBadge(); } });
+  return callApi('getDashboard', {}, quiet).then(res => {
+    if (!res.success) throw new Error(res.message || 'Server tidak mengembalikan data dashboard');
+    if (!res.msds_items) throw new Error('Backend belum versi terbaru (belum ada data MSDS). Deploy ulang Web App sebagai versi baru.');
+    dash = res; updateBadge();
+  });
 }
 function updateBadge() {
   const n = dash ? dash.counts.expired + dash.counts.m1 + dash.msds_counts.expired + dash.msds_counts.m3 : 0, b = $('monBadge');
@@ -407,7 +411,7 @@ function setSub(s) {
 function openMon() {
   showView('mon');
   $('monList').innerHTML = '<p class="sub">Memuat data...</p>';
-  loadDash().then(renderMon).catch(() => { $('monList').innerHTML = '<p class="sub">Gagal memuat data.</p>'; });
+  loadDash().then(renderMon).catch(err => { $('monList').innerHTML = '<p class="msg msg-err">Gagal memuat data: ' + esc(err.message) + '</p>'; });
 }
 function renderMon() {
   if (!dash) return;
