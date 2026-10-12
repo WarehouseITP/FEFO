@@ -281,7 +281,7 @@ function fillItem() {
   $('itemName').innerText = r.nama_barang; $('itemCode').innerText = r.code_number;
   $('itemWhBadge').innerText = 'WH: ' + r.wh_code; $('itemUom').innerText = r.uom;
   $('itemWh').innerText = r.wh_code || '-'; $('itemLoc').innerText = r.location || '-';
-  $('itemShelf').innerText = r.shelf_life_days ? r.shelf_life_days + ' hari' : '-';
+  $('itemShelf').innerText = r.shelf_life_months ? r.shelf_life_months + ' bulan' : '-';
   $('itemStock').innerText = r.total_stock + ' ' + r.uom;
   fillMsds(r.msds);
   const ex = $('expiryList');
@@ -305,7 +305,7 @@ function submitLocation() {
 function rcvHint() {
   const e = $('rcvExpDate').value, p = $('rcvProdDate').value;
   $('rcvHint').innerText = e ? 'Pakai expired date. Production date disimpan sebagai info tambahan.'
-    : p ? (currentItem.shelf_life_days ? 'Expired dihitung otomatis: production date + ' + currentItem.shelf_life_days + ' hari.'
+    : p ? (currentItem.shelf_life_months ? 'Expired dihitung otomatis: production date + ' + currentItem.shelf_life_months + ' bulan.'
            : 'Barang ini belum punya shelf life. Akan dipantau berdasarkan umur (ditandai kalau lebih dari 1 tahun).')
     : 'Kosongkan dua-duanya kalau barang tidak punya tanggal (misal spare part).';
 }
@@ -381,14 +381,16 @@ const GB = [
   { k: 'm1', l: 'Kurang 1 bulan', c: '#854F0B' },
   { k: 'm3', l: '1 sampai 3 bulan', c: '#1C5AA6' },
   { k: 'm6', l: '3 sampai 6 bulan', c: '#3B6D11' },
-  { k: 'age', l: 'Prod date > 1 tahun', c: '#5F5E5A' }
+  { k: 'age', l: 'Prod date > 1 tahun', c: '#5F5E5A' },
+  { k: 'ok', l: 'Aman', c: '#3B6D11' }
 ];
 const GM = [
   { k: 'expired', l: 'Sudah lewat', c: '#A32D2D' },
   { k: 'm3', l: 'Kurang 3 bulan', c: '#854F0B' },
   { k: 'm6', l: '3 sampai 6 bulan', c: '#1C5AA6' },
   { k: 'm12', l: '6 sampai 12 bulan', c: '#3B6D11' },
-  { k: 'missing', l: 'Belum ada data', c: '#5F5E5A' }
+  { k: 'missing', l: 'Belum ada data', c: '#5F5E5A' },
+  { k: 'ok', l: 'Aman', c: '#3B6D11' }
 ];
 let dash = null, monSub = 'brg', monGroup = 'all';
 
@@ -435,16 +437,17 @@ function renderMon() {
   let html = '';
   G.forEach(g => {
     if (monGroup !== 'all' && monGroup !== g.k) return;
+    if (monGroup === 'all' && g.k === 'ok') return; // daftar Aman hanya tampil kalau kartunya diketuk
     const rows = base.filter(i => i.group === g.k);
     if (!rows.length) return;
-    const extra = g.k === 'age' ? ' - belum ada shelf life, urut dari yang paling lama' : (!isB && g.k === 'missing') ? ' - bahan kimia tanpa tanggal revisi MSDS' : '';
+    const extra = g.k === 'ok' ? (isB ? ' - expired lebih dari 6 bulan lagi, atau hanya prod date dengan umur di bawah 1 tahun' : ' - berlaku lebih dari 12 bulan lagi') : g.k === 'age' ? ' - belum ada shelf life, urut dari yang paling lama' : (!isB && g.k === 'missing') ? ' - bahan kimia tanpa tanggal revisi MSDS' : '';
     html += '<div class="gh">' + g.l + ' (' + rows.length + ')' + extra + '</div>';
     rows.forEach(i => {
       let left, right, wh1;
       if (isB) {
-        let tag = i.source === 'calc' ? '<span class="tag">Prod + ' + i.shelf_life_days + ' hari</span>' : '';
+        let tag = i.source === 'calc' ? '<span class="tag">Prod + ' + i.shelf_life_months + ' bulan</span>' : '';
         left = '<b>' + esc(i.code_number) + '</b>' + tag + '<br>' + esc(i.nama_barang) + '<br><span class="sub">' + esc(i.wh_code) + ' | ' + esc(i.location || '-') + ' | ' + i.qty_available + ' ' + esc(i.uom) + '</span>';
-        right = i.group === 'age'
+        right = i.days_left == null
           ? '<b style="color:' + g.c + '">Umur ' + i.age_days + ' hari</b><br><span class="sub">Prod ' + esc(i.production_date) + '</span>'
           : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left === 0 ? 'Hari ini' : i.days_left + ' hari lagi') + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
         wh1 = i.wh_code;
@@ -458,7 +461,8 @@ function renderMon() {
       html += '<div class="mr" onclick="openFromMon(\'' + esc(wh1) + '\',\'' + esc(i.code_number) + '\')"><div>' + left + '</div><div class="rt">' + right + '</div></div>';
     });
   });
-  $('monList').innerHTML = html || '<p class="sub">Tidak ada yang perlu diperhatikan.</p>';
+  if (monGroup === 'all') html += '<p class="sub" style="margin-top:14px">Ketuk kartu Aman untuk melihat daftar yang masih aman.</p>';
+  $('monList').innerHTML = html || '<p class="sub">Tidak ada data.</p>';
 }
 function openFromMon(wh, code) { looking = false; doLookup(wh, code); }
 
