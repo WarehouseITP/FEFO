@@ -41,6 +41,9 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
 .mr{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #eee;font-size:13px;cursor:pointer}
 .mr:last-child{border-bottom:none}.rt{text-align:right;white-space:nowrap}
 .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px;margin-left:6px;background:#eee;color:#555}
+.seg{display:flex;margin:10px 0 0}.seg button{margin:0;border-radius:0;background:#e4e4e0;color:#444;font-size:13px;padding:9px}
+.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}.seg button.on{background:#DCEBFC;color:#1C5AA6;font-weight:600}
+.msds{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px}
 .hint{font-size:12px;margin-top:10px;padding:8px 10px;border-radius:6px;background:#DCEBFC;color:#1C5AA6}
 </style>
 </head>
@@ -86,6 +89,7 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
       <tr><td>Shelf life</td><td id="itemShelf">-</td></tr>
       <tr><td><b>Total stock</b></td><td id="itemStock">-</td></tr>
     </table>
+    <div id="msdsBox"></div>
     <button class="btn-secondary" onclick="openForm('loc')">Ubah lokasi</button>
     <div class="row2" style="margin-top:8px">
       <button class="btn-in" onclick="openForm('rcv')">Receiving</button>
@@ -156,6 +160,7 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
       <h2 style="margin:0">Monitoring expired</h2>
       <button class="btn-secondary" style="width:auto;margin:0;padding:6px 12px;font-size:13px" onclick="openMon()">Muat ulang</button>
     </div>
+    <div class="seg"><button class="on" id="segBrg" onclick="setSub('brg')">Expired barang</button><button id="segMsds" onclick="setSub('msds')">MSDS</button></div>
     <div class="mets" id="mets"></div>
     <div class="row2">
       <div><select id="monWh" onchange="renderMon()"><option value="">Semua WH</option></select></div>
@@ -278,6 +283,7 @@ function fillItem() {
   $('itemWh').innerText = r.wh_code || '-'; $('itemLoc').innerText = r.location || '-';
   $('itemShelf').innerText = r.shelf_life_days ? r.shelf_life_days + ' hari' : '-';
   $('itemStock').innerText = r.total_stock + ' ' + r.uom;
+  fillMsds(r.msds);
   const ex = $('expiryList');
   ex.innerHTML = r.expiry_breakdown.length ? '' : '<p class="sub">Tidak ada stock aktif.</p>';
   r.expiry_breakdown.forEach(b => { ex.innerHTML += '<div class="opt" style="cursor:default">' + batchLabel(b) + ' - Qty: ' + b.qty_available + '</div>'; });
@@ -346,24 +352,57 @@ function submitIssuing() {
   }).catch(() => {});
 }
 
+// ---------- MSDS di kartu barang ----------
+const MS_STYLE = {
+  expired: ['#FCEBEB', '#A32D2D'], m3: ['#FAEEDA', '#854F0B'], m6: ['#DCEBFC', '#1C5AA6'],
+  m12: ['#EAF3DE', '#3B6D11'], ok: ['#EAF3DE', '#3B6D11'], missing: ['#F1EFE8', '#5F5E5A']
+};
+function daysText(n) { return n < 0 ? 'lewat ' + (-n) + ' hari' : n === 0 ? 'berakhir hari ini' : n + ' hari lagi'; }
+function fileText(link) {
+  if (!link) return '';
+  const l = esc(link);
+  return '<div style="margin-top:6px">' + (/^https?:\/\//i.test(link) ? '<a href="' + l + '" target="_blank" rel="noopener">Buka file MSDS</a>' : 'Lokasi file: ' + l) + '</div>';
+}
+function fillMsds(m) {
+  const box = $('msdsBox');
+  if (!m || (!m.required && !m.has)) { box.innerHTML = ''; return; }
+  const st = MS_STYLE[m.group] || MS_STYLE.missing;
+  let t;
+  if (!m.has) t = '<b>MSDS belum ada data</b><br>Isi revision_date di sheet MSDS untuk code number ini.';
+  else t = '<b>MSDS ' + (m.group === 'expired' ? 'sudah lewat masa berlaku' : 'berlaku') + '</b><br>Revisi terakhir ' + esc(m.revision_date) +
+    ', berlaku sampai ' + esc(m.valid_until) + ' (' + daysText(m.days_left) + ')';
+  box.innerHTML = '<div class="msds" style="background:' + st[0] + ';color:' + st[1] + '">' + t + fileText(m.file_link) +
+    (m.catatan ? '<div style="margin-top:4px">' + esc(m.catatan) + '</div>' : '') + '</div>';
+}
+
 // ---------- monitoring ----------
-const GROUPS = [
+const GB = [
   { k: 'expired', l: 'Sudah expired', c: '#A32D2D' },
   { k: 'm1', l: 'Kurang 1 bulan', c: '#854F0B' },
   { k: 'm3', l: '1 sampai 3 bulan', c: '#1C5AA6' },
   { k: 'm6', l: '3 sampai 6 bulan', c: '#3B6D11' },
   { k: 'age', l: 'Prod date > 1 tahun', c: '#5F5E5A' }
 ];
-let dash = null, monGroup = 'all';
+const GM = [
+  { k: 'expired', l: 'Sudah lewat', c: '#A32D2D' },
+  { k: 'm3', l: 'Kurang 3 bulan', c: '#854F0B' },
+  { k: 'm6', l: '3 sampai 6 bulan', c: '#1C5AA6' },
+  { k: 'm12', l: '6 sampai 12 bulan', c: '#3B6D11' },
+  { k: 'missing', l: 'Belum ada data', c: '#5F5E5A' }
+];
+let dash = null, monSub = 'brg', monGroup = 'all';
 
 function loadDash(quiet) {
-  return callApi('getDashboard', {}, quiet).then(res => {
-    if (res.success) { dash = res; updateBadge(); }
-  });
+  return callApi('getDashboard', {}, quiet).then(res => { if (res.success) { dash = res; updateBadge(); } });
 }
 function updateBadge() {
-  const n = dash ? dash.counts.expired + dash.counts.m1 : 0, b = $('monBadge');
+  const n = dash ? dash.counts.expired + dash.counts.m1 + dash.msds_counts.expired + dash.msds_counts.m3 : 0, b = $('monBadge');
   b.innerText = n; b.classList.toggle('hidden', !n);
+}
+function setSub(s) {
+  monSub = s; monGroup = 'all';
+  $('segBrg').classList.toggle('on', s === 'brg'); $('segMsds').classList.toggle('on', s === 'msds');
+  renderMon();
 }
 function openMon() {
   showView('mon');
@@ -372,14 +411,16 @@ function openMon() {
 }
 function renderMon() {
   if (!dash) return;
+  const isB = monSub === 'brg', G = isB ? GB : GM, src = isB ? dash.items : dash.msds_items;
   const whSel = $('monWh'), cur = whSel.value;
-  const whs = [...new Set(dash.items.map(i => i.wh_code))].sort();
+  const whs = [...new Set(dash.items.map(i => i.wh_code).concat(...dash.msds_items.map(i => i.wh_list)))].sort();
   whSel.innerHTML = '<option value="">Semua WH</option>' + whs.map(w => '<option' + (w === cur ? ' selected' : '') + '>' + esc(w) + '</option>').join('');
   const q = $('monQ').value.toLowerCase(), wh = whSel.value;
-  const base = dash.items.filter(i => (!wh || i.wh_code === wh) && (!q || (i.code_number + ' ' + i.nama_barang).toLowerCase().indexOf(q) > -1));
+  const base = src.filter(i => (!wh || (isB ? i.wh_code === wh : i.wh_list.indexOf(wh) > -1)) &&
+    (!q || (i.code_number + ' ' + i.nama_barang).toLowerCase().indexOf(q) > -1));
 
   $('mets').innerHTML = '';
-  GROUPS.forEach(g => {
+  G.forEach(g => {
     const b = document.createElement('button');
     b.className = 'met' + (monGroup === g.k ? ' on' : '');
     b.innerHTML = g.l + '<b style="color:' + g.c + '">' + base.filter(i => i.group === g.k).length + '</b>';
@@ -388,25 +429,32 @@ function renderMon() {
   });
 
   let html = '';
-  GROUPS.forEach(g => {
+  G.forEach(g => {
     if (monGroup !== 'all' && monGroup !== g.k) return;
     const rows = base.filter(i => i.group === g.k);
     if (!rows.length) return;
-    html += '<div class="gh">' + g.l + ' (' + rows.length + ')' + (g.k === 'age' ? ' - belum ada shelf life, urut dari yang paling lama' : '') + '</div>';
+    const extra = g.k === 'age' ? ' - belum ada shelf life, urut dari yang paling lama' : (!isB && g.k === 'missing') ? ' - bahan kimia tanpa tanggal revisi MSDS' : '';
+    html += '<div class="gh">' + g.l + ' (' + rows.length + ')' + extra + '</div>';
     rows.forEach(i => {
-      let right, tag = '';
-      if (i.group === 'age') {
-        right = '<b style="color:' + g.c + '">Umur ' + i.age_days + ' hari</b><br><span class="sub">Prod ' + esc(i.production_date) + '</span>';
+      let left, right, wh1;
+      if (isB) {
+        let tag = i.source === 'calc' ? '<span class="tag">Prod + ' + i.shelf_life_days + ' hari</span>' : '';
+        left = '<b>' + esc(i.code_number) + '</b>' + tag + '<br>' + esc(i.nama_barang) + '<br><span class="sub">' + esc(i.wh_code) + ' | ' + esc(i.location || '-') + ' | ' + i.qty_available + ' ' + esc(i.uom) + '</span>';
+        right = i.group === 'age'
+          ? '<b style="color:' + g.c + '">Umur ' + i.age_days + ' hari</b><br><span class="sub">Prod ' + esc(i.production_date) + '</span>'
+          : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left === 0 ? 'Hari ini' : i.days_left + ' hari lagi') + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
+        wh1 = i.wh_code;
       } else {
-        const d = i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left === 0 ? 'Hari ini' : i.days_left + ' hari lagi';
-        right = '<b style="color:' + g.c + '">' + d + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
-        if (i.source === 'calc') tag = '<span class="tag">Prod + ' + i.shelf_life_days + ' hari</span>';
+        left = '<b>' + esc(i.code_number) + '</b>' + i.wh_list.map(w => '<span class="tag">' + esc(w) + '</span>').join('') + '<br>' + esc(i.nama_barang || '-') +
+          '<br><span class="sub">' + (i.revision_date ? 'Revisi terakhir ' + esc(i.revision_date) : i.has_row ? 'Tanggal revisi kosong atau tidak valid' : 'Belum ada baris di sheet MSDS') + '</span>';
+        right = i.group === 'missing' ? '<b style="color:' + g.c + '">Isi data MSDS</b>'
+          : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left + ' hari lagi') + '</b><br><span class="sub">s/d ' + esc(i.valid_until) + '</span>';
+        wh1 = i.wh_list.length === 1 ? i.wh_list[0] : '';
       }
-      html += '<div class="mr" onclick="openFromMon(\'' + esc(i.wh_code) + '\',\'' + esc(i.code_number) + '\')"><div><b>' + esc(i.code_number) + '</b>' + tag +
-        '<br>' + esc(i.nama_barang) + '<br><span class="sub">' + esc(i.wh_code) + ' | ' + esc(i.location || '-') + ' | ' + i.qty_available + ' ' + esc(i.uom) + '</span></div><div class="rt">' + right + '</div></div>';
+      html += '<div class="mr" onclick="openFromMon(\'' + esc(wh1) + '\',\'' + esc(i.code_number) + '\')"><div>' + left + '</div><div class="rt">' + right + '</div></div>';
     });
   });
-  $('monList').innerHTML = html || '<p class="sub">Tidak ada barang yang perlu diperhatikan.</p>';
+  $('monList').innerHTML = html || '<p class="sub">Tidak ada yang perlu diperhatikan.</p>';
 }
 function openFromMon(wh, code) { looking = false; doLookup(wh, code); }
 
