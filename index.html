@@ -86,15 +86,19 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
       <tr><td>UOM</td><td id="itemUom">-</td></tr>
       <tr><td>WH Code</td><td id="itemWh">-</td></tr>
       <tr><td>Location</td><td id="itemLoc">-</td></tr>
-      <tr><td>Shelf life</td><td id="itemShelf">-</td></tr>
-      <tr><td><b>Total stock</b></td><td id="itemStock">-</td></tr>
+      <tr id="rowShelf"><td>Shelf life</td><td id="itemShelf">-</td></tr>
+      <tr id="rowStock"><td><b>Total stock</b></td><td id="itemStock">-</td></tr>
     </table>
+    <div id="msdsOnlyNote" class="hint hidden" style="margin:10px 0 0"><b>Item ini tidak punya expired date atau production date.</b><br>Hanya dipantau lokasi dan MSDS-nya. Stok dan expired tidak dicatat.</div>
     <div id="msdsBox"></div>
     <button class="btn-secondary" onclick="openForm('loc')">Ubah lokasi</button>
+    <div id="rowActions">
     <div class="row2" style="margin-top:8px">
       <button class="btn-in" onclick="openForm('rcv')">Receiving</button>
       <button class="btn-out" onclick="openForm('isu')">Issuing</button>
     </div>
+    </div>
+    <div id="stockSection">
     <h2 style="margin-top:16px">Breakdown per batch</h2>
     <div id="expiryList"></div>
     <h2 style="margin-top:16px">Bin card (10 transaksi terakhir)</h2>
@@ -102,6 +106,7 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
       <thead><tr><th>Tgl</th><th>Doc</th><th>Exp / Prod</th><th>In</th><th>Out</th><th>Bal</th></tr></thead>
       <tbody id="logBody"></tbody>
     </table>
+    </div>
   </div>
 </div>
 
@@ -124,7 +129,7 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
   <div class="card">
     <h2>Form receiving</h2>
     <label>Tanggal</label><input type="date" id="rcvDate">
-    <label>Doc No (nomor GRN/PO manual)</label><input id="rcvDocNo">
+    <label>No PO</label><input id="rcvDocNo">
     <label>Expired date (kosongkan kalau barang tidak punya expired)</label><input type="date" id="rcvExpDate">
     <label>Production date (isi kalau barang hanya punya tanggal produksi)</label><input type="date" id="rcvProdDate">
     <div class="hint" id="rcvHint"></div>
@@ -144,7 +149,7 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
     <p style="font-size:13px;color:#666">Pilih batch yang mau dikeluarkan (paling atas = prioritas keluar):</p>
     <div id="isuOptions"></div>
     <label>Tanggal</label><input type="date" id="isuDate">
-    <label>Doc No (nomor issuing manual)</label><input id="isuDocNo">
+    <label>No MIS</label><input id="isuDocNo">
     <label>Quantity keluar</label><input type="number" id="isuQty">
     <label>User (yang mengambil barang)</label><input id="isuUser">
     <label>Initial store keeper</label><input id="isuInitial">
@@ -277,12 +282,14 @@ function batchLabel(r) {
   return '<i>Tanpa tanggal</i>';
 }
 function fillItem() {
-  const r = currentItem;
+  const r = currentItem, only = !!r.msds_only;
+  ['rowShelf', 'rowStock', 'rowActions', 'stockSection'].forEach(id => $(id).classList.toggle('hidden', only));
+  $('msdsOnlyNote').classList.toggle('hidden', !only);
   $('itemName').innerText = r.nama_barang; $('itemCode').innerText = r.code_number;
   $('itemWhBadge').innerText = 'WH: ' + r.wh_code; $('itemUom').innerText = r.uom;
   $('itemWh').innerText = r.wh_code || '-'; $('itemLoc').innerText = r.location || '-';
   $('itemShelf').innerText = r.shelf_life_months ? r.shelf_life_months + ' bulan' : '-';
-  $('itemStock').innerText = r.total_stock + ' ' + r.uom;
+  $('itemStock').innerText = only ? '-' : r.total_stock + ' ' + r.uom;
   fillMsds(r.msds);
   const ex = $('expiryList');
   ex.innerHTML = r.expiry_breakdown.length ? '' : '<p class="sub">Tidak ada stock aktif.</p>';
@@ -357,7 +364,26 @@ const MS_STYLE = {
   expired: ['#FCEBEB', '#A32D2D'], m3: ['#FAEEDA', '#854F0B'], m6: ['#DCEBFC', '#1C5AA6'],
   m12: ['#EAF3DE', '#3B6D11'], ok: ['#EAF3DE', '#3B6D11'], missing: ['#F1EFE8', '#5F5E5A']
 };
-function daysText(n) { return n < 0 ? 'lewat ' + (-n) + ' hari' : n === 0 ? 'berakhir hari ini' : n + ' hari lagi'; }
+// selisih kalender a -> b (a <= b) dalam tahun, bulan, hari; satuan yang nol tidak ditulis
+function addM(a, n) {
+  const r = new Date(a.getFullYear(), a.getMonth() + n, 1);
+  r.setDate(Math.min(a.getDate(), new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate()));
+  return r;
+}
+function durText(a, b) {
+  let n = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
+  if (addM(a, n) > b) n--;
+  const y = Math.floor(n / 12), m = n % 12, d = Math.round((b - addM(a, n)) / 864e5), p = [];
+  if (y) p.push(y + ' tahun'); if (m) p.push(m + ' bulan'); if (d) p.push(d + ' hari');
+  return p.join(' ');
+}
+function remainText(validUntil) {
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  const a = validUntil.split('-'), v = new Date(+a[0], a[1] - 1, +a[2]);
+  if (v < t) return 'lewat ' + durText(v, t);
+  if (v.getTime() === t.getTime()) return 'berakhir hari ini';
+  return durText(t, v) + ' lagi';
+}
 function fileText(link) {
   if (!link) return '';
   const l = esc(link);
@@ -370,7 +396,7 @@ function fillMsds(m) {
   let t;
   if (!m.has) t = '<b>MSDS belum ada data</b><br>Isi revision_date di sheet MSDS untuk code number ini.';
   else t = '<b>MSDS ' + (m.group === 'expired' ? 'sudah lewat masa berlaku' : 'berlaku') + '</b><br>Revisi terakhir ' + esc(m.revision_date) +
-    ', berlaku sampai ' + esc(m.valid_until) + ' (' + daysText(m.days_left) + ')';
+    ', berlaku sampai ' + esc(m.valid_until) + ' (' + remainText(m.valid_until) + ')';
   box.innerHTML = '<div class="msds" style="background:' + st[0] + ';color:' + st[1] + '">' + t + fileText(m.file_link) +
     (m.catatan ? '<div style="margin-top:4px">' + esc(m.catatan) + '</div>' : '') + '</div>';
 }
@@ -452,7 +478,7 @@ function renderMon() {
           : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left === 0 ? 'Hari ini' : i.days_left + ' hari lagi') + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
         wh1 = i.wh_code;
       } else {
-        left = '<b>' + esc(i.code_number) + '</b>' + i.wh_list.map(w => '<span class="tag">' + esc(w) + '</span>').join('') + '<br>' + esc(i.nama_barang || '-') +
+        left = '<b>' + esc(i.code_number) + '</b>' + i.wh_list.map(w => '<span class="tag">' + esc(w) + '</span>').join('') + (i.msds_only ? '<span class="tag">Hanya MSDS</span>' : '') + '<br>' + esc(i.nama_barang || '-') +
           '<br><span class="sub">' + (i.revision_date ? 'Revisi terakhir ' + esc(i.revision_date) : i.has_row ? 'Tanggal revisi kosong atau tidak valid' : 'Belum ada baris di sheet MSDS') + '</span>';
         right = i.group === 'missing' ? '<b style="color:' + g.c + '">Isi data MSDS</b>'
           : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left + ' hari lagi') + '</b><br><span class="sub">s/d ' + esc(i.valid_until) + '</span>';
