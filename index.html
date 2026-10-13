@@ -39,7 +39,7 @@ th,td{text-align:left;padding:5px 4px;border-bottom:1px solid #eee}
 .met b{display:block;font-size:22px;font-weight:600;margin-top:2px}
 .gh{font-size:12px;font-weight:600;color:#666;margin:14px 0 2px}
 .mr{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #eee;font-size:13px;cursor:pointer}
-.mr:last-child{border-bottom:none}.rt{text-align:right;white-space:nowrap}
+.mr:last-child{border-bottom:none}.rt{text-align:right;max-width:48%}
 .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px;margin-left:6px;background:#eee;color:#555}
 .seg{display:flex;margin:10px 0 0}.seg button{margin:0;border-radius:0;background:#e4e4e0;color:#444;font-size:13px;padding:9px}
 .seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}.seg button.on{background:#DCEBFC;color:#1C5AA6;font-weight:600}
@@ -377,6 +377,7 @@ function durText(a, b) {
   if (y) p.push(y + ' tahun'); if (m) p.push(m + ' bulan'); if (d) p.push(d + ' hari');
   return p.join(' ');
 }
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 function remainText(validUntil) {
   const t = new Date(); t.setHours(0, 0, 0, 0);
   const a = validUntil.split('-'), v = new Date(+a[0], a[1] - 1, +a[2]);
@@ -475,13 +476,13 @@ function renderMon() {
         left = '<b>' + esc(i.code_number) + '</b>' + tag + '<br>' + esc(i.nama_barang) + '<br><span class="sub">' + esc(i.wh_code) + ' | ' + esc(i.location || '-') + ' | ' + i.qty_available + ' ' + esc(i.uom) + '</span>';
         right = i.days_left == null
           ? '<b style="color:' + g.c + '">Umur ' + i.age_days + ' hari</b><br><span class="sub">Prod ' + esc(i.production_date) + '</span>'
-          : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left === 0 ? 'Hari ini' : i.days_left + ' hari lagi') + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
+          : '<b style="color:' + g.c + '">' + cap(remainText(i.effective_date)) + '</b><br><span class="sub">' + esc(i.effective_date) + '</span>';
         wh1 = i.wh_code;
       } else {
         left = '<b>' + esc(i.code_number) + '</b>' + i.wh_list.map(w => '<span class="tag">' + esc(w) + '</span>').join('') + (i.msds_only ? '<span class="tag">Hanya MSDS</span>' : '') + '<br>' + esc(i.nama_barang || '-') +
           '<br><span class="sub">' + (i.revision_date ? 'Revisi terakhir ' + esc(i.revision_date) : i.has_row ? 'Tanggal revisi kosong atau tidak valid' : 'Belum ada baris di sheet MSDS') + '</span>';
         right = i.group === 'missing' ? '<b style="color:' + g.c + '">Isi data MSDS</b>'
-          : '<b style="color:' + g.c + '">' + (i.days_left < 0 ? 'Lewat ' + (-i.days_left) + ' hari' : i.days_left + ' hari lagi') + '</b><br><span class="sub">s/d ' + esc(i.valid_until) + '</span>';
+          : '<b style="color:' + g.c + '">' + cap(remainText(i.valid_until)) + '</b><br><span class="sub">s/d ' + esc(i.valid_until) + '</span>';
         wh1 = i.wh_list.length === 1 ? i.wh_list[0] : '';
       }
       html += '<div class="mr" onclick="openFromMon(\'' + esc(wh1) + '\',\'' + esc(i.code_number) + '\')"><div>' + left + '</div><div class="rt">' + right + '</div></div>';
