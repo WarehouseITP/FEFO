@@ -395,7 +395,7 @@ function fillMsds(m) {
   if (!m || (!m.required && !m.has)) { box.innerHTML = ''; return; }
   const st = MS_STYLE[m.group] || MS_STYLE.missing;
   let t;
-  if (!m.has) t = '<b>MSDS belum ada data</b><br>Isi revision_date di sheet MSDS untuk code number ini.';
+  if (!m.has) t = '<b>MSDS belum ada data</b><br>Isi msds_revision_date di sheet MasterItem untuk code number ini.';
   else t = '<b>MSDS ' + (m.group === 'expired' ? 'sudah lewat masa berlaku' : 'berlaku') + '</b><br>Revisi terakhir ' + esc(m.revision_date) +
     ', berlaku sampai ' + esc(m.valid_until) + ' (' + remainText(m.valid_until) + ')';
   box.innerHTML = '<div class="msds" style="background:' + st[0] + ';color:' + st[1] + '">' + t + fileText(m.file_link) +
@@ -480,7 +480,7 @@ function renderMon() {
         wh1 = i.wh_code;
       } else {
         left = '<b>' + esc(i.code_number) + '</b>' + i.wh_list.map(w => '<span class="tag">' + esc(w) + '</span>').join('') + (i.msds_only ? '<span class="tag">Hanya MSDS</span>' : '') + '<br>' + esc(i.nama_barang || '-') +
-          '<br><span class="sub">' + (i.revision_date ? 'Revisi terakhir ' + esc(i.revision_date) : i.has_row ? 'Tanggal revisi kosong atau tidak valid' : 'Belum ada baris di sheet MSDS') + '</span>';
+          '<br><span class="sub">' + (i.revision_date ? 'Revisi terakhir ' + esc(i.revision_date) : i.has_row ? 'Tanggal revisi kosong atau tidak valid' : 'Belum ada data MSDS di MasterItem') + '</span>';
         right = i.group === 'missing' ? '<b style="color:' + g.c + '">Isi data MSDS</b>'
           : '<b style="color:' + g.c + '">' + cap(remainText(i.valid_until)) + '</b><br><span class="sub">s/d ' + esc(i.valid_until) + '</span>';
         wh1 = i.wh_list.length === 1 ? i.wh_list[0] : '';
